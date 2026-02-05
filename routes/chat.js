@@ -13,7 +13,7 @@ chatRouter.get('/', async (req, res) => {
         res.json(chats);
     } catch (error) {
         console.error(error);
-        res.status(500).send('error.message');
+        res.status(500).send(error.message);
     }
 });
 
@@ -31,7 +31,7 @@ chatRouter.get('/:id', async (req, res) => {
         res.json(chat);
     } catch (error) {
         console.error(error);
-        res.status(500).send('error.message');
+        res.status(500).send(error.message);
     }
 });
 
@@ -51,7 +51,7 @@ chatRouter.post('/', async (req, res) => {
         res.status(201).json(newChat);
     } catch (error) {
         console.error(error);
-        res.status(500).send('error.message');
+        res.status(500).send(error.message);
     }
 });
 
@@ -70,7 +70,7 @@ chatRouter.delete('/:id', async (req, res) => {
         res.send("Chat deleted successfully");
     } catch (error) {
         console.error(error);
-        res.status(500).send('error.message');
+        res.status(500).send(error.message);
         
     }
 });
@@ -99,7 +99,7 @@ chatRouter.patch('/:id', async (req, res) => {
         res.json(chat); // return updated chat
     } catch (error) {
         console.error(error);
-        res.status(500).send('error.message');
+        res.status(500).send(error.message);
     }
     });
 
