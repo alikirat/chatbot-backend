@@ -1,15 +1,15 @@
 import express from 'express';
 import Chat from '../models/Chat.js';
+import authenticateJWT from '../middleware/authenticateJWT.js';
 
-
-/**
- * GET /api/chat return all chats
- */
 const chatRouter = express.Router();
 
-chatRouter.get('/', async (req, res) => {
+/**
+ * GET /api/chat return the authenticated user's chats
+ */
+chatRouter.get('/', authenticateJWT, async (req, res) => {
     try {
-        const chats = await Chat.find();
+        const chats = await Chat.find({ userId: req.user.userId }).sort({ updatedAt: -1 });
         res.json(chats);
     } catch (error) {
         console.error(error);
@@ -18,14 +18,18 @@ chatRouter.get('/', async (req, res) => {
 });
 
 /**
- * Get /api/chat/:id return chat by id
+ * GET /api/chat/:id return chat by id, if owned by the authenticated user
  */
-chatRouter.get('/:id', async (req, res) => {
+chatRouter.get('/:id', authenticateJWT, async (req, res) => {
     try {
         const chat = await Chat.findById(req.params.id);
 
         if (!chat) {
             return res.status(404).send('Chat not found');
+        }
+
+        if (!chat.userId || chat.userId.toString() !== req.user.userId) {
+            return res.status(403).send('Forbidden');
         }
 
         res.json(chat);
@@ -36,17 +40,17 @@ chatRouter.get('/:id', async (req, res) => {
 });
 
 /**
- * POST /api/chat create a new chat
+ * POST /api/chat create a new chat, owned by the authenticated user
  */
-chatRouter.post('/', async (req, res) => {
+chatRouter.post('/', authenticateJWT, async (req, res) => {
     // {
     //     "title": "Chat 1",
     //     "messages": [
-            
+
     //     ]
     // }
     try {
-        const newChat = new Chat(req.body);
+        const newChat = new Chat({ ...req.body, userId: req.user.userId });
         await newChat.save();
         res.status(201).json(newChat);
     } catch (error) {
@@ -56,33 +60,41 @@ chatRouter.post('/', async (req, res) => {
 });
 
 /**
- * DELETE /api/chat/:id delete chat by id
+ * DELETE /api/chat/:id delete chat by id, if owned by the authenticated user
  */
-
-chatRouter.delete('/:id', async (req, res) => {
+chatRouter.delete('/:id', authenticateJWT, async (req, res) => {
     try {
-        const deletedChat = await Chat.findByIdAndDelete(req.params.id);
-        
-        if (!deletedChat) {
+        const chat = await Chat.findById(req.params.id);
+
+        if (!chat) {
             return res.status(404).send('Chat not found');
         }
 
+        if (!chat.userId || chat.userId.toString() !== req.user.userId) {
+            return res.status(403).send('Forbidden');
+        }
+
+        await Chat.findByIdAndDelete(req.params.id);
         res.send("Chat deleted successfully");
     } catch (error) {
         console.error(error);
         res.status(500).send(error.message);
-        
+
     }
 });
 
 /**
- * PATCH /api/chat/:id update chat by id
+ * PATCH /api/chat/:id update chat by id, if owned by the authenticated user
  */
-chatRouter.patch('/:id', async (req, res) => {
+chatRouter.patch('/:id', authenticateJWT, async (req, res) => {
     try {
-        const chat = await Chat.findByIdAndUpdate(req.params.id);
+        const chat = await Chat.findById(req.params.id);
         if (!chat) {
             return res.status(404).send('Chat not found');
+        }
+
+        if (!chat.userId || chat.userId.toString() !== req.user.userId) {
+            return res.status(403).send('Forbidden');
         }
 
         // update title of the chat
