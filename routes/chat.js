@@ -1,8 +1,45 @@
 import express from 'express';
+import Groq from 'groq-sdk';
 import Chat from '../models/Chat.js';
 import authenticateJWT from '../middleware/authenticateJWT.js';
 
 const chatRouter = express.Router();
+
+// Created lazily (not at module load) since env vars from .env aren't
+// guaranteed to be loaded yet when this module is imported - ES module
+// imports are evaluated before the importing file's own top-level code
+// (including its dotenv.config() call) runs.
+let groq;
+function getGroqClient() {
+    if (!groq) {
+        groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+    }
+    return groq;
+}
+
+/**
+ * POST /api/chat/completion - proxy a chat completion through Groq
+ * server-side, so the Groq API key never has to reach the browser.
+ */
+chatRouter.post('/completion', authenticateJWT, async (req, res) => {
+    try {
+        const { messages } = req.body;
+
+        if (!messages || !Array.isArray(messages)) {
+            return res.status(400).json({ message: "messages array is required" });
+        }
+
+        const completion = await getGroqClient().chat.completions.create({
+            messages,
+            model: "openai/gpt-oss-20b",
+        });
+
+        res.json(completion);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error generating chat completion", error: error.message });
+    }
+});
 
 /**
  * GET /api/chat return the authenticated user's chats
