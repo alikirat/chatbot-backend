@@ -1,8 +1,23 @@
 # Groq Proxy Plan
 
-Status: **Proposed, not yet approved or implemented.** Flagged as a good
-follow-up during the multi-chat + auth work (see
-`multi-chat-auth-plan.md`), not required for that to work, and not built.
+Status: **Done.** Flagged as a good follow-up during the multi-chat + auth
+work (see `multi-chat-auth-plan.md`), then approved and built.
+
+Shipped mostly as planned, in the same order: additive backend route first
+(commit `2af90a6`), verified live, then the frontend cutover (commit
+`d7772b2`), verified live including a check that the shipped bundle
+contains no trace of the API key.
+
+One thing not in the original plan: the Groq client can't be constructed
+at module load time in the backend route file. ES module imports are
+evaluated before the importing file's own top-level code, including its
+`dotenv.config()` call, so a module-level client would read `undefined`
+for the key in local dev (harmless in production, since Render injects
+env vars directly, but it broke local testing). Fixed by creating the
+client lazily on first use instead.
+
+The "further option" below (persisting atomically alongside the
+completion call) was not built, still worth considering later.
 
 ## The problem
 
