@@ -1,19 +1,70 @@
-# Backend API Template
+# Chatbot Backend API
 
-## Instructions
+Backend API for the [Chatbot](https://github.com/alikirat/chatbot) app. Handles
+user accounts and persists chat conversations, each scoped to the account that
+owns it.
 
-1. Clone the repo `git clone <repo-url> <new-project-name>`
-2. cd into your new project folder and run `npm i`
-3. Rename the package.json to your folder name
-4. `ls -la` to see if the repo is still connected to previous repo. If you see `.git`, run `rm -rf .git`
-5. Create a new `.env` file and add the `MONGODB_URI`
-6. add a database name to the URI. You can use same name as folder. `.....mongodb.net/<database name goes here>?retryWrites=true&w....."`
-7. Run the app with: `npm run dev`
+**Live API:** https://akdev-chatbot-api.onrender.com
+**Frontend:** [chatbot](https://github.com/alikirat/chatbot) ([live demo](https://akdev-chatbot.netlify.app))
 
-### Dependencies 
-`"cors": "^2.8.5",`
-`"dotenv": "^16.4.7",`
-`"express": "^4.21.2",`
-`"helmet": "^8.0.0",`
-`"mongoose": "^8.12.1",`
-`"pug": "^3.0.3"`
+> 📌 **Note:** This is a portfolio/demo project. All data is for testing purposes only. Please don't enter real personal information.
+
+## Features
+
+- User accounts with JWT-based authentication (register/login, bcrypt-hashed passwords)
+- Chats are scoped per user: each account only sees and can modify its own conversations
+- Full CRUD for chats (create, list, get, update, delete), each with its own message history
+
+## Tech Stack
+
+Node.js, Express, MongoDB with Mongoose, JWT (`jsonwebtoken`) + `bcrypt` for auth, Helmet, CORS, Morgan.
+
+## API Endpoints
+
+### Auth
+```
+POST /api/auth/register   Create a new account
+POST /api/auth/login      Log in, returns a JWT
+```
+
+### Chat (all routes require a valid JWT)
+```
+GET    /api/chat/      Get the authenticated user's chats
+GET    /api/chat/:id   Get a specific chat (must be owned by the user)
+POST   /api/chat       Create a new chat
+PATCH  /api/chat/:id   Add messages or update the title of a chat
+DELETE /api/chat/:id   Delete a chat
+```
+
+### Health
+```
+GET /api/health   Returns { "status": "ok" }
+```
+
+## Setup
+
+1. Clone the repo:
+   ```bash
+   git clone https://github.com/alikirat/chatbot-backend
+   cd chatbot-backend
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Create a `.env` file:
+   ```env
+   MONGODB_URI=your_mongodb_connection_string
+   JWT_SECRET=your_secret_key_here
+   PORT=4000
+   ```
+4. Run the app:
+   ```bash
+   npm run dev
+   ```
+
+Server runs on `http://localhost:4000` by default.
+
+## Related Repository
+
+**Frontend:** [https://github.com/alikirat/chatbot](https://github.com/alikirat/chatbot)
