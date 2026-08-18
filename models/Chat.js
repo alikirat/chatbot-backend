@@ -2,6 +2,12 @@ import mongoose from "mongoose";
 
 const chatSchema = new mongoose.Schema(
     {
+        // Not required yet - chat routes don't enforce auth or ownership
+        // yet, this just lays the groundwork for that.
+        userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+        },
         title: {
             type: String,
             required: true,
