@@ -14,10 +14,11 @@ owns it.
 - User accounts with JWT-based authentication (register/login, bcrypt-hashed passwords)
 - Chats are scoped per user: each account only sees and can modify its own conversations
 - Full CRUD for chats (create, list, get, update, delete), each with its own message history
+- Proxies AI completions through Groq server-side, so the API key stays out of the browser
 
 ## Tech Stack
 
-Node.js, Express, MongoDB with Mongoose, JWT (`jsonwebtoken`) + `bcrypt` for auth, Helmet, CORS, Morgan.
+Node.js, Express, MongoDB with Mongoose, JWT (`jsonwebtoken`) + `bcrypt` for auth, `groq-sdk`, Helmet, CORS, Morgan.
 
 ## API Endpoints
 
@@ -29,11 +30,12 @@ POST /api/auth/login      Log in, returns a JWT
 
 ### Chat (all routes require a valid JWT)
 ```
-GET    /api/chat/      Get the authenticated user's chats
-GET    /api/chat/:id   Get a specific chat (must be owned by the user)
-POST   /api/chat       Create a new chat
-PATCH  /api/chat/:id   Add messages or update the title of a chat
-DELETE /api/chat/:id   Delete a chat
+GET    /api/chat/             Get the authenticated user's chats
+GET    /api/chat/:id          Get a specific chat (must be owned by the user)
+POST   /api/chat              Create a new chat
+PATCH  /api/chat/:id          Add messages or update the title of a chat
+DELETE /api/chat/:id          Delete a chat
+POST   /api/chat/completion   Proxy a chat completion through Groq
 ```
 
 ### Health
@@ -56,6 +58,7 @@ GET /api/health   Returns { "status": "ok" }
    ```env
    MONGODB_URI=your_mongodb_connection_string
    JWT_SECRET=your_secret_key_here
+   GROQ_API_KEY=your_groq_api_key_here
    PORT=4000
    ```
 4. Run the app:
