@@ -68,6 +68,21 @@ GET /api/health   Returns { "status": "ok" }
 
 Server runs on `http://localhost:4000` by default.
 
+## Testing
+
+The test suite uses Vitest and Supertest against an in-memory MongoDB
+(`mongodb-memory-server`), so it never touches a real database or the real
+Groq API:
+
+```bash
+npm test
+```
+
+Tests live in `tests/` and cover auth (register/login), chat creation and
+per-user listing, and ownership checks on chats (a user can only view,
+update, or delete their own chats), plus the completion proxy's auth
+requirement.
+
 ## Related Repository
 
 **Frontend:** [https://github.com/alikirat/chatbot](https://github.com/alikirat/chatbot)
